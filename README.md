@@ -93,7 +93,7 @@ npm run start
 | `npm run lint` | ESLint |
 | `npm run typecheck` | 라우트 타입 생성 후 `tsc --noEmit` |
 | `npm test` | 단위 테스트 (검색, 포맷, 일봉 정규화, KIS 분할 조회·토큰 재사용·오류 처리, 데모 응답) |
-| `npm run test:e2e` | E2E 테스트 (주요 흐름, 메뉴·내 정보, 커뮤니티, 탭 레이아웃 고정, 7가지 화면 크기 반응형) (`npm run build` 이후 실행. 기본으로 로컬 Edge를 쓰며, `PW_CHANNEL=chrome`으로 바꿀 수 있음) |
+| `npm run test:e2e` | E2E 테스트 (주요 흐름, 메뉴·내 정보, 커뮤니티, 탭 레이아웃 고정, 7가지 화면 크기 반응형) (`npm run build` 이후 실행. 기본으로 로컬 Edge를 쓰며, `PW_CHANNEL=chrome`으로 바꿀 수 있음. `PW_BASE_URL=<배포 주소>`를 주면 배포된 사이트를 테스트) |
 
 ## 배포 (Netlify)
 
