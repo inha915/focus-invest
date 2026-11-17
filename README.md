@@ -93,6 +93,17 @@ npm run start
 | `npm test` | 단위 테스트 (검색, 포맷, 일봉 정규화, KIS 분할 조회·토큰 재사용·오류 처리, 데모 응답) |
 | `npm run test:e2e` | E2E 테스트 (주요 흐름, 메뉴·내 정보, 커뮤니티, 탭 레이아웃 고정, 7가지 화면 크기 반응형) (`npm run build` 이후 실행. 기본으로 로컬 Edge를 쓰며, `PW_CHANNEL=chrome`으로 바꿀 수 있음) |
 
+## 배포 (Netlify)
+
+1. Netlify에서 **Add new project → Import an existing project → GitHub**를 누르고 `focus-invest` 저장소를 선택합니다.
+2. 빌드 설정은 `netlify.toml`에서 자동으로 읽습니다 (`npm run build`, Node 22).
+3. 환경변수 없이 배포하면 샘플 시세 모드로 동작합니다.
+4. 실제 시세를 쓰려면 **Site configuration → Environment variables**에 아래 값을 추가하고 다시 배포합니다.
+   - `DATA_PROVIDER=kis`, `KIS_APP_KEY`, `KIS_APP_SECRET`
+   - 서버 함수에서 읽어야 하므로 Scope에 Functions를 포함해야 합니다.
+
+> 서버리스 환경에서는 토큰 파일 캐시를 쓸 수 없어 메모리 캐시만 사용합니다. 함수 인스턴스가 새로 뜨면 토큰을 다시 발급받을 수 있습니다.
+
 ## 시세 데이터 모드
 
 ### 샘플 모드 (기본)

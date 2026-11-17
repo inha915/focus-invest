@@ -1,0 +1,12 @@
+# Netlify 배포 설정
+# Next.js는 Netlify가 자동 감지해 OpenNext 어댑터(@netlify/plugin-nextjs)로 빌드한다.
+# 시세 모드는 기본값이 샘플(mock)이라 환경변수 없이도 모든 화면이 동작한다.
+# KIS 모드를 쓰려면 Netlify UI > Site configuration > Environment variables 에서
+# DATA_PROVIDER=kis, KIS_APP_KEY, KIS_APP_SECRET (Scope: Functions 포함) 을 설정한다.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
