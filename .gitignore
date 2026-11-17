@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# but keep the example env file
+!.env.example
+
+# KIS 접근 토큰 캐시 (로컬 전용, 절대 커밋 금지)
+/.cache/
+
+# KIS에서 받은 시세 데이터 덤프 등은 저장소에 포함하지 않음
+/data/kis/
+*.kis.json
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

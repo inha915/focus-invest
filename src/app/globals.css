@@ -1,26 +1,222 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-brand: #3182f6;
+  --color-brand-strong: #1b64da;
+  --color-brand-soft: #e8f3ff;
+  --color-up: #f04452;
+  --color-up-soft: #fff0f1;
+  --color-down: #2f6fe4;
+  --color-down-soft: #edf3ff;
+  --color-ink: #191f28;
+  --color-sub: #4e5968;
+  --color-muted: #8b95a1;
+  --color-faint: #b0b8c1;
+  --color-line: #f2f4f6;
+  --color-surface: #f9fafb;
+  --color-canvas: #f2f4f6;
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-tap-highlight-color: transparent;
+  /* 페이지마다 스크롤바 유무가 달라도 가운데 컬럼이 좌우로 밀리지 않도록 자리를 고정 */
+  scrollbar-gutter: stable;
+  /* iOS 가로 모드 글자 자동 확대 방지 */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+}
+
+/* 가격 숫자는 자릿수가 흔들리지 않도록 고정폭 숫자 */
+.num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f2f4f6 0px, #e5e8eb 80px, #f2f4f6 160px);
+  background-size: 200px 100%;
+  animation: shimmer 1.2s infinite linear;
+  border-radius: 8px;
+}
+
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.bubble-in {
+  animation: bubble-in 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton, .bubble-in { animation: none; }
+}
+
+@keyframes drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.drawer-in { animation: drawer-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.fade-in { animation: fade-in 0.2s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer-in, .fade-in { animation: none; }
+}
+
+/* 가로 모드 노치(safe area) 대응: 앱 컬럼과 하단 고정 요소에 좌우 여백 */
+.safe-x {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ───────────── 드로어 닫힘 ───────────── */
+@keyframes drawer-out {
+  from { transform: none; }
+  to { transform: translateX(100%); }
+}
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.drawer-out { animation: drawer-out 0.2s cubic-bezier(0.4, 0, 1, 1) forwards; }
+.fade-out { animation: fade-out 0.2s ease-in forwards; }
+
+/* ───────────── 화면 전환 (React ViewTransition) ─────────────
+ * 나가는 화면은 빠르게, 들어오는 화면은 조금 더 천천히 → 겹침 없이 부드럽게 */
+:root {
+  --vt-exit: 140ms;
+  --vt-enter: 240ms;
+  --vt-move: 360ms;
+  --vt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 전환 중에도 클릭이 막히지 않도록 */
+::view-transition {
+  pointer-events: none;
+}
+
+/* 레이아웃(하단 탭 바 등)은 그대로: 루트 스냅샷 크로스페이드를 끈다 */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* 하단 탭 바는 전환 중에도 고정 */
+::view-transition-group(tab-bar) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(tab-bar) {
+  display: none;
+}
+::view-transition-new(tab-bar) {
+  animation: none;
+}
+
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes vt-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes vt-rise {
+  from { transform: translateY(8px); }
+  to { transform: none; }
+}
+@keyframes vt-slide {
+  from { translate: var(--vt-offset) 0; }
+  to { translate: 0 0; }
+}
+
+/* 하단 탭 · 기본: 살짝 떠오르며 페이드 */
+::view-transition-old(.fade-through) {
+  animation: var(--vt-exit) ease-out both vt-fade-out;
+}
+::view-transition-new(.fade-through) {
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade-in,
+    var(--vt-move) var(--vt-ease) var(--vt-exit) both vt-rise;
+}
+
+/* 안으로 들어가기: 오른쪽에서 밀려 들어옴 */
+::view-transition-old(.nav-forward) {
+  --vt-offset: -48px;
+  animation:
+    var(--vt-exit) ease-in both vt-fade-out,
+    var(--vt-move) var(--vt-ease) both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --vt-offset: 48px;
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade-in,
+    var(--vt-move) var(--vt-ease) both vt-slide;
+}
+
+/* 바깥으로 나오기: 왼쪽에서 들어옴 */
+::view-transition-old(.nav-back) {
+  --vt-offset: 48px;
+  animation:
+    var(--vt-exit) ease-in both vt-fade-out,
+    var(--vt-move) var(--vt-ease) both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --vt-offset: -48px;
+  animation:
+    var(--vt-enter) ease-out var(--vt-exit) both vt-fade-in,
+    var(--vt-move) var(--vt-ease) both vt-slide;
+}
+
+/* 상세 화면 안 시세/커뮤니티 탭: 짧은 크로스페이드 */
+::view-transition-old(.tab-fade) {
+  animation: 120ms ease-out both vt-fade-out;
+}
+::view-transition-new(.tab-fade) {
+  animation:
+    200ms ease-out 80ms both vt-fade-in,
+    280ms var(--vt-ease) 80ms both vt-rise;
+}
+
+/* 누를 때 살짝 눌리는 피드백 */
+.press {
+  transition: transform 0.12s ease-out, background-color 0.15s ease-out;
+}
+.press:active {
+  transform: scale(0.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+  .drawer-out, .fade-out { animation: none; }
+  .press:active { transform: none; }
 }
