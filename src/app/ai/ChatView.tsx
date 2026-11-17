@@ -112,7 +112,7 @@ export function ChatView({ responder: injected }: { responder?: ChatResponder })
         )}
 
         <ul className="mt-4 space-y-3">
-          {messages.map((m) => (
+          {messages.map((m, index) => (
             <li key={m.id} className={`bubble-in flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[86%] ${m.role === "user" ? "" : "space-y-2"}`}>
                 <div
@@ -128,7 +128,9 @@ export function ChatView({ responder: injected }: { responder?: ChatResponder })
                   )}
                   {m.text}
                 </div>
-                {m.suggestions && <SuggestionChips questions={m.suggestions} onPick={send} disabled={pending} />}
+                {m.suggestions && index === messages.length - 1 && (
+                  <SuggestionChips questions={m.suggestions} onPick={send} disabled={pending} />
+                )}
               </div>
             </li>
           ))}

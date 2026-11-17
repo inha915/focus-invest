@@ -51,6 +51,7 @@ export function useApi<T>(url: string | null) {
     const controller = new AbortController();
     fetchJson<T>(url, controller.signal).then(
       (data) => {
+        if (controller.signal.aborted) return;
         setResult({ key, data });
         setPrevious(data);
       },

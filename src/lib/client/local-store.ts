@@ -13,13 +13,15 @@ type Listener = () => void;
 
 const listeners = new Map<string, Set<Listener>>();
 const cache = new Map<string, { raw: string | null; value: unknown }>();
+// 저장소 제한/용량 초과 시 현재 탭에서만 유지하는 값 (null은 삭제).
+const fallback = new Map<string, string | null>();
 
 export function readLocal<T>(key: string, sanitize: (v: unknown) => T, empty: T): T {
   let raw: string | null = null;
   try {
-    raw = window.localStorage.getItem(key);
+    raw = fallback.has(key) ? fallback.get(key)! : window.localStorage.getItem(key);
   } catch {
-    // 저장소 접근 불가 (시크릿 모드 제한 등)
+    raw = cache.get(key)?.raw ?? null;
   }
   const hit = cache.get(key);
   if (hit && hit.raw === raw) return hit.value as T;
@@ -34,10 +36,12 @@ export function readLocal<T>(key: string, sanitize: (v: unknown) => T, empty: T)
 }
 
 export function writeLocal<T>(key: string, value: T): void {
+  const raw = JSON.stringify(value);
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    window.localStorage.setItem(key, raw);
+    fallback.delete(key);
   } catch {
-    // 쓸 수 없는 환경에서는 무시
+    fallback.set(key, raw);
   }
   listeners.get(key)?.forEach((l) => l());
 }
@@ -45,8 +49,9 @@ export function writeLocal<T>(key: string, value: T): void {
 export function removeLocal(key: string): void {
   try {
     window.localStorage.removeItem(key);
+    fallback.delete(key);
   } catch {
-    // 무시
+    fallback.set(key, null);
   }
   listeners.get(key)?.forEach((l) => l());
 }

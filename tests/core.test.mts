@@ -42,6 +42,27 @@ describe("일봉 정규화", () => {
 });
 
 describe("데모 채팅 응답", () => {
+  for (const root of EXAMPLE_QUESTIONS) {
+    test(`${root}: 서로 다른 꼬리질문 10개 뒤 주제 선택으로 복귀`, () => {
+      let reply = buildDemoReply(root);
+      const questions = new Set<string>();
+      const answers = new Set<string>();
+      for (let step = 0; step < 10; step++) {
+        assert.equal(reply.suggestions?.length, 1);
+        const question = reply.suggestions![0];
+        assert.ok(!questions.has(question));
+        questions.add(question);
+        reply = buildDemoReply(question);
+        assert.ok(reply.demo);
+        assert.ok(!reply.text.includes("아직 데모 채팅이라"));
+        assert.ok(!answers.has(reply.text));
+        answers.add(reply.text);
+        assert.equal(buildDemoReply(`  ${question}  `).text, reply.text);
+      }
+      assert.equal(questions.size, 10);
+      assert.deepEqual(reply.suggestions, [...EXAMPLE_QUESTIONS]);
+    });
+  }
   test("예시 질문에는 예시 응답", () => {
     const a = buildDemoReply(EXAMPLE_QUESTIONS[0]);
     assert.ok(a.demo && a.text.includes("PER"));

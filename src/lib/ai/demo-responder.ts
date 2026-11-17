@@ -1,4 +1,5 @@
 import type { ChatMessage, ChatRequest, ChatResponder, StockContext } from "./types";
+import { FOLLOW_UPS } from "./follow-ups";
 
 /**
  * 데모 응답기. 미리 작성한 예시 답변만 돌려준다.
@@ -68,11 +69,23 @@ export function createMessageId(): string {
 /** 질문 → 예시 응답 텍스트 (순수 함수, 테스트하기 쉽도록 분리) */
 export function buildDemoReply(message: string, stock?: StockContext): Omit<ChatMessage, "id"> {
   const q = normalize(message);
+  // 일반 키워드 매칭보다 먼저 검사해 거래량 꼬리질문도 각각의 답변으로 연결한다.
+  for (const steps of Object.values(FOLLOW_UPS)) {
+    const index = steps.findIndex(([question]) => normalize(question) === q);
+    if (index < 0) continue;
+    const next = steps[index + 1];
+    return {
+      role: "assistant",
+      demo: true,
+      text: `${steps[index][1]}\n\n${DISCLAIMER}`,
+      suggestions: next ? [next[0]] : [...EXAMPLE_QUESTIONS],
+    };
+  }
   if (isCompareQuestion(q)) {
-    return { role: "assistant", demo: true, text: `${compareAnswer()}\n\n${DISCLAIMER}` };
+    return { role: "assistant", demo: true, text: `${compareAnswer()}\n\n${DISCLAIMER}`, suggestions: [FOLLOW_UPS.compare[0][0]] };
   }
   if (isVolumeQuestion(q)) {
-    return { role: "assistant", demo: true, text: `${volumeAnswer(stock)}\n\n${DISCLAIMER}` };
+    return { role: "assistant", demo: true, text: `${volumeAnswer(stock)}\n\n${DISCLAIMER}`, suggestions: [FOLLOW_UPS.volume[0][0]] };
   }
   return {
     role: "assistant",
